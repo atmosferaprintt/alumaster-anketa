@@ -38,9 +38,17 @@ textarea{min-height:88px}
 .btn.skip{background:none; color:var(--gray); font-weight:500; font-size:14px; padding:8px; flex:0 0 auto}
 .btn:disabled{opacity:.4}
 /* интро и финал */
-.intro h1{font-size:24px; line-height:1.3; margin:10px 0}
-.intro p{color:#444; margin:10px 0; font-size:15.5px}
-.intro .mini{font-size:13px; color:var(--gray)}
+.card.dark{background:var(--black); border-color:var(--black); color:#fff; justify-content:center; text-align:center}
+.intro .wordmark{font-size:34px; font-weight:800; letter-spacing:-.5px}
+.intro .wordmark .alu{color:var(--red)}
+.intro .wm-sub{font-size:10px; font-weight:600; letter-spacing:3px; color:#9a9a9a; margin-top:4px}
+.intro .rule{width:44px; height:3px; background:var(--red); border-radius:99px; margin:26px auto}
+.intro h1{font-size:22px; line-height:1.35; margin:0 0 12px}
+.intro p{color:#c9c9c9; margin:0 auto 10px; font-size:15px; max-width:340px}
+.intro .facts{display:flex; justify-content:center; gap:22px; margin:24px 0 8px}
+.intro .facts div{font-size:12.5px; color:#9a9a9a}
+.intro .facts b{display:block; font-size:19px; color:#fff; margin-bottom:2px}
+.intro .btn.next{background:var(--red); margin-top:18px}
 .done .big{font-size:52px; text-align:center; margin:20px 0 6px}
 .wa{display:flex; align-items:center; justify-content:center; gap:10px; width:100%; background:#25D366; color:#fff; font-size:17px; font-weight:700; border:0; border-radius:14px; padding:16px; cursor:pointer; margin-top:14px; text-decoration:none}
 .copy{display:block; width:100%; text-align:center; background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:14px; font:inherit; font-size:15px; font-weight:600; margin-top:10px; cursor:pointer}
@@ -105,12 +113,20 @@ function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;
 function render(){
   bar.style.width=(i<0?0:Math.round((i)/Q.length*100))+'%';
   lbl.textContent=i<0?'':(i>=Q.length?'Готово!':`Вопрос ${i+1} из ${Q.length}`);
-  if(i<0){card.innerHTML=`<div class="intro">
-    <div class="sec">АлюМастер-05 × новая CRM</div>
-    <h1>Ассаламу алейкум! 👋</h1>
-    <p>Мы готовим для вашей компании CRM-систему. Чтобы она попала точно в ваши процессы, ответьте, пожалуйста, на ${Q.length} коротких вопросов.</p>
-    <p class="mini">⏱ Займёт 5–7 минут. Почти везде — просто выбрать вариант. В конце ответы одной кнопкой отправятся в WhatsApp.</p>
+  if(i<0){card.className='card dark'; card.innerHTML=`<div class="intro">
+    <div class="wordmark"><span class="alu">Alu</span>Master</div>
+    <div class="wm-sub">ALUMINIUM PROFILE SYSTEMS</div>
+    <div class="rule"></div>
+    <h1>Анкета для новой CRM-системы</h1>
+    <p>Мы разрабатываем для «АлюМастер-05» систему управления продажами и складом. Ваши ответы помогут настроить её точно под процессы компании.</p>
+    <div class="facts">
+      <div><b>${Q.length}</b>вопросов</div>
+      <div><b>5–7</b>минут</div>
+      <div><b>1</b>кнопка в конце</div>
+    </div>
+    <p style="font-size:13px">Почти везде достаточно выбрать вариант. В конце ответы отправятся нам в WhatsApp одним сообщением.</p>
     <div class="navr"><button class="btn next" onclick="go(1)">Начать →</button></div></div>`; return}
+  card.className='card';
   if(i>=Q.length){finish(); return}
   const q=Q[i];
   let body='';
@@ -159,8 +175,8 @@ function finish(){
   bar.style.width='100%';
   const s=summary();
   card.innerHTML=`<div class="done">
-    <div class="big">🎉</div>
-    <h2 style="text-align:center">Баркалла! Всё готово.</h2>
+    <div class="big">✅</div>
+    <h2 style="text-align:center">Спасибо! Всё готово.</h2>
     <p class="hint" style="text-align:center; margin-top:6px">Осталось отправить ответы — нажмите зелёную кнопку, откроется WhatsApp с готовым сообщением.</p>
     <a class="wa" href="https://wa.me/?text=${encodeURIComponent(s+'\n\n'+FILES)}" target="_blank">📲 Отправить ответы в WhatsApp</a>
     <button class="copy" onclick="copyAns()">Скопировать ответы текстом</button>
