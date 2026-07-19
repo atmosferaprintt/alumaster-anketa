@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>АлюМастер · Анкета для новой CRM</title>
+<meta name="robots" content="noindex">
+<style>
+:root{--red:#ED0000; --black:#141414; --gray:#7a7f85; --line:#e6e8ea; --bg:#f4f5f6; --soft:#f8f9fa}
+*{box-sizing:border-box; margin:0; -webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif; background:var(--bg); color:#1c1c1e; font-size:16px; line-height:1.45}
+.app{max-width:520px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; padding:18px 16px calc(20px + env(safe-area-inset-bottom))}
+/* шапка */
+.brand{text-align:center; margin:6px 0 2px; font-size:22px; font-weight:800; letter-spacing:-.3px}
+.brand .alu{color:var(--red)}
+.brand small{display:block; font-size:10px; font-weight:600; letter-spacing:2.4px; color:var(--gray); margin-top:2px}
+.progress{height:5px; background:#e2e4e7; border-radius:99px; margin:16px 0 6px; overflow:hidden}
+.progress i{display:block; height:100%; background:var(--red); border-radius:99px; transition:width .25s}
+.step-label{font-size:12px; color:var(--gray); text-align:center; margin-bottom:12px}
+/* карточка вопроса */
+.card{background:#fff; border:1px solid var(--line); border-radius:18px; padding:22px 18px; flex:1; display:flex; flex-direction:column}
+.sec{font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--red); margin-bottom:8px}
+h2{font-size:19px; line-height:1.35; margin-bottom:4px}
+.hint{font-size:13.5px; color:var(--gray); margin-bottom:14px}
+.opts{display:flex; flex-direction:column; gap:9px; margin-top:4px}
+.opt{border:1.5px solid var(--line); background:#fff; border-radius:13px; padding:13px 15px; font-size:15.5px; text-align:left; cursor:pointer; transition:.12s}
+.opt.on{border-color:var(--red); background:#fff5f5; font-weight:600}
+.opt .sub{display:block; font-size:12.5px; color:var(--gray); font-weight:400; margin-top:2px}
+textarea,input[type=text]{width:100%; font:inherit; font-size:15.5px; border:1.5px solid var(--line); border-radius:13px; padding:12px 14px; margin-top:8px; resize:none; background:#fff}
+textarea:focus,input:focus{outline:none; border-color:var(--black)}
+textarea{min-height:88px}
+/* низ */
+.navr{display:flex; gap:10px; margin-top:18px}
+.btn{flex:1; font:inherit; font-size:16px; font-weight:700; border-radius:13px; padding:15px; border:0; cursor:pointer}
+.btn.next{background:var(--black); color:#fff}
+.btn.next:active{transform:scale(.98)}
+.btn.back{flex:0 0 84px; background:#eceef0; color:#555; font-weight:600}
+.btn.skip{background:none; color:var(--gray); font-weight:500; font-size:14px; padding:8px; flex:0 0 auto}
+.btn:disabled{opacity:.4}
+/* интро и финал */
+.intro h1{font-size:24px; line-height:1.3; margin:10px 0}
+.intro p{color:#444; margin:10px 0; font-size:15.5px}
+.intro .mini{font-size:13px; color:var(--gray)}
+.done .big{font-size:52px; text-align:center; margin:20px 0 6px}
+.wa{display:flex; align-items:center; justify-content:center; gap:10px; width:100%; background:#25D366; color:#fff; font-size:17px; font-weight:700; border:0; border-radius:14px; padding:16px; cursor:pointer; margin-top:14px; text-decoration:none}
+.copy{display:block; width:100%; text-align:center; background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:14px; font:inherit; font-size:15px; font-weight:600; margin-top:10px; cursor:pointer}
+.sum{background:var(--soft); border:1px solid var(--line); border-radius:13px; padding:12px 14px; font-size:12.5px; color:#444; margin-top:14px; max-height:180px; overflow:auto; white-space:pre-wrap}
+.toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--black); color:#fff; font-size:14px; padding:10px 18px; border-radius:99px; opacity:0; transition:.3s; pointer-events:none; z-index:9}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="brand"><span class="alu">Alu</span>Master<small>АНКЕТА ДЛЯ НОВОЙ CRM</small></div>
+  <div class="progress"><i id="bar" style="width:0%"></i></div>
+  <div class="step-label" id="steplbl">&nbsp;</div>
+  <div class="card" id="card"></div>
+</div>
+<div class="toast" id="toast">Скопировано ✓</div>
+
+<script>
+/* ─── Вопросы ───
+ t: single | multi | text
+ q: вопрос, h: подсказка, o: варианты [текст, подстрока?], txt: доп.поле "уточнить" */
+const Q=[
+ {sec:'Ассортимент', t:'single', q:'Что вы продаёте?', o:['Только алюминиевый профиль и комплектующие','Алюминий + ПВХ','Алюминий, ПВХ и стеклопакеты','Другое'], txt:'Если «другое» — напишите'},
+ {sec:'Ассортимент', t:'single', q:'Сколько примерно позиций в ассортименте?', o:['До 100','100 – 500','500 – 2000','Больше 2000 / не считали']},
+ {sec:'Клиенты', t:'single', q:'Кто ваши клиенты?', h:'Можно выбрать главное', o:['Только производители окон и конструкций','Производители + строительные фирмы','Производители + частники тоже']},
+ {sec:'Клиенты', t:'single', q:'Сколько примерно активных клиентов?', o:['До 20','20 – 50','50 – 150','Больше 150']},
+ {sec:'Клиенты', t:'single', q:'Где сейчас база клиентов?', o:['В Excel','В тетради / блокноте','В СуперОкнах','В телефонах менеджеров','Нигде / везде понемногу']},
+ {sec:'Клиенты', t:'single', q:'Есть ли у клиентов индивидуальные цены или скидки?', o:['Да, у многих','У нескольких крупных','Нет, цены одинаковые']},
+ {sec:'Продажи', t:'single', q:'Куда сейчас звонят клиенты?', o:['На мобильные менеджеров','На один общий номер','Есть корпоративная АТС','В основном пишут в WhatsApp'], txt:'Если АТС — какая? (Билайн, Манго…)'},
+ {sec:'Продажи', t:'single', q:'Как отправляете КП клиенту?', o:['WhatsApp','Печатаем на бумаге','E-mail','По-разному']},
+ {sec:'Продажи', t:'single', q:'Подтверждение КП подписью — как удобнее клиентам?', o:['Расписаться на бумаге, менеджер фотографирует','Подпись пальцем на экране телефона','И так, и так']},
+ {sec:'Продажи', t:'single', q:'За какое время хотите, чтобы клиент получал КП после звонка?', o:['В течение часа','В течение 2–3 часов','В тот же день','Как получится — главное не терять']},
+ {sec:'СуперОкна', t:'single', q:'Какая версия программы СуперОкна?', o:['СуперОкна 8','СуперОкна 7','Не знаю, надо посмотреть']},
+ {sec:'СуперОкна', t:'single', q:'На скольких компьютерах стоит СуперОкна?', o:['На одном','На нескольких (сетевая)','Не знаю']},
+ {sec:'СуперОкна', t:'single', q:'Кто обслуживает / настраивал СуперОкна?', o:['Свой сотрудник','Приходящий специалист','Никто, само работает'], txt:'Контакт специалиста, если есть'},
+ {sec:'Склад', t:'single', q:'Как обозначаются места хранения на складе?', o:['Ряды / стеллажи с номерами','Просто «все знают, где что лежит»','По-другому'], txt:'Если по-другому — как?'},
+ {sec:'Склад', t:'single', q:'Ведётся ли учёт остатков?', o:['Да, в СуперОкнах','Да, в Excel / тетради','Завсклад держит в голове','Не ведётся']},
+ {sec:'Склад', t:'single', q:'Учёт остатков в CRM нужен сразу или потом?', h:'Накладные без цен будут в любом случае с первого дня', o:['Сразу, это важно','Можно вторым этапом','Не обязательно вообще']},
+ {sec:'Отгрузка', t:'single', q:'Как доставляете товар?', o:['Своя доставка','Самовывоз','И то, и другое']},
+ {sec:'Отгрузка', t:'single', q:'Сколько водителей / машин?', o:['1','2–3','Больше 3','Нанимаем по надобности']},
+ {sec:'Отгрузка', t:'single', q:'Бывает ли частичная отгрузка заказа?', h:'Сегодня профиль, завтра фурнитура', o:['Да, часто','Редко','Нет']},
+ {sec:'Деньги', t:'single', q:'Работаете ли с отсрочкой платежа?', o:['Да, у многих клиентов отсрочка','Только у избранных','Нет, только предоплата / по факту']},
+ {sec:'Деньги', t:'single', q:'Как контролируете должников сейчас?', o:['Excel / тетрадь','В голове','Никак, и это проблема']},
+ {sec:'Деньги', t:'single', q:'Какие документы выставляете клиентам?', o:['Счёт + УПД (есть 1С и бухгалтер)','Только счёт','Почти без документов'], txt:'Уточнение, если нужно'},
+ {sec:'Деньги', t:'single', q:'Касса (приход/расход денег) в CRM — нужна в первой версии?', o:['Да, сразу','Вторым этапом','Не нужна']},
+ {sec:'Команда', t:'single', q:'Состав команды верный?', h:'Коммерческий директор · начальник отдела продаж + 4 менеджера · завсклад + 5 сотрудников склада', o:['Да, всё верно','Почти, есть отличия'], txt:'Если есть отличия — напишите'},
+ {sec:'Команда', t:'single', q:'Выездные менеджеры — что делают на выезде?', o:['Собирают заявки у клиентов','Возят образцы, презентуют','Дожимают КП, забирают подписи','Всё перечисленное']},
+ {sec:'Команда', t:'single', q:'Контроль выездов — что нужно?', o:['План выездов + отчёт с фото','План + отчёт + геолокация','Достаточно плана']},
+ {sec:'Команда', t:'single', q:'Какие телефоны у сотрудников?', o:['В основном iPhone','В основном Android','Поровну','Не знаю']},
+ {sec:'Команда', t:'single', q:'Кто будет главным по CRM с вашей стороны?', h:'С кем согласовывать правки', o:['Я сам (владелец)','Коммерческий директор','Начальник отдела продаж'], txt:'Имя и телефон, если не вы'},
+ {sec:'Чат', t:'multi', q:'Какие чаты нужны в CRM сразу?', h:'Можно выбрать несколько', o:['Чат по каждому заказу','Чаты-проекты по объектам / стройкам','Чат отдела продаж','Чат склада','Общий чат компании']},
+ {sec:'Напоследок', t:'text', q:'Главная боль, которую CRM должна решить в первую очередь?', h:'Своими словами, 1–2 предложения'},
+ {sec:'Напоследок', t:'text', q:'Что ещё нам важно знать?', h:'Всё, что не спросили. Можно пропустить'}
+];
+/* Файлы, которые просим прислать - показываются на финале */
+const FILES='📎 И ещё просьба — пришлите вместе с ответами:\n1) пример вашего КП\n2) счёт/спецификацию из СуперОкон\n3) фото бумажки, которая сейчас идёт на склад\n4) прайс (какой есть)';
+
+let i=-1; const ans=Q.map(()=>({pick:[],txt:''}));
+const card=document.getElementById('card'), bar=document.getElementById('bar'), lbl=document.getElementById('steplbl');
+
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function render(){
+  bar.style.width=(i<0?0:Math.round((i)/Q.length*100))+'%';
+  lbl.textContent=i<0?'':(i>=Q.length?'Готово!':`Вопрос ${i+1} из ${Q.length}`);
+  if(i<0){card.innerHTML=`<div class="intro">
+    <div class="sec">АлюМастер-05 × новая CRM</div>
+    <h1>Ассаламу алейкум! 👋</h1>
+    <p>Мы готовим для вашей компании CRM-систему. Чтобы она попала точно в ваши процессы, ответьте, пожалуйста, на ${Q.length} коротких вопросов.</p>
+    <p class="mini">⏱ Займёт 5–7 минут. Почти везде — просто выбрать вариант. В конце ответы одной кнопкой отправятся в WhatsApp.</p>
+    <div class="navr"><button class="btn next" onclick="go(1)">Начать →</button></div></div>`; return}
+  if(i>=Q.length){finish(); return}
+  const q=Q[i];
+  let body='';
+  if(q.t==='text'){
+    body=`<textarea id="tx" placeholder="Ваш ответ…">${esc(ans[i].txt)}</textarea>`;
+  }else{
+    body=`<div class="opts">${q.o.map((o,j)=>`<button class="opt ${ans[i].pick.includes(j)?'on':''}" onclick="pick(${j})">${o}</button>`).join('')}</div>`;
+    if(q.txt) body+=`<input type="text" id="tx" placeholder="${q.txt}" value="${esc(ans[i].txt)}">`;
+  }
+  card.innerHTML=`<div class="sec">${q.sec}</div><h2>${q.q}</h2>${q.h?`<div class="hint">${q.h}</div>`:''}
+   ${body}
+   <div style="flex:1"></div>
+   <div class="navr">
+     ${i>0?'<button class="btn back" onclick="go(-1)">←</button>':''}
+     <button class="btn next" onclick="go(1)" ${q.t!=='text'&&!ans[i].pick.length?'disabled':''} id="nextb">${i===Q.length-1?'Завершить ✓':'Дальше →'}</button>
+   </div>
+   ${q.t==='text'?'<button class="btn skip" onclick="go(1,true)">Пропустить</button>':''}`;
+  if(q.t==='text'){const t=document.getElementById('tx'); t.oninput=()=>ans[i].txt=t.value;}
+  else if(q.txt){const t=document.getElementById('tx'); t.oninput=()=>ans[i].txt=t.value;}
+}
+function pick(j){
+  const q=Q[i];
+  if(q.t==='multi'){
+    const p=ans[i].pick, k=p.indexOf(j); k>=0?p.splice(k,1):p.push(j);
+  }else{ans[i].pick=[j]}
+  render();
+}
+function go(d,skip){
+  if(d>0&&i>=0&&i<Q.length){const t=document.getElementById('tx'); if(t)ans[i].txt=t.value; if(skip)ans[i].txt='';}
+  i+=d; render(); window.scrollTo(0,0);
+}
+function summary(){
+  let s='📋 АНКЕТА АлюМастер-05 для CRM\n\n';
+  let sec='';
+  Q.forEach((q,k)=>{
+    const a=ans[k]; if(!a.pick.length&&!a.txt.trim())return;
+    if(q.sec!==sec){sec=q.sec; s+=`— ${sec.toUpperCase()} —\n`}
+    s+=`${q.q}\n`;
+    if(a.pick.length)s+=`▸ ${a.pick.map(j=>q.o[j]).join('; ')}\n`;
+    if(a.txt.trim())s+=`✎ ${a.txt.trim()}\n`;
+    s+='\n';
+  });
+  return s.trim();
+}
+function finish(){
+  bar.style.width='100%';
+  const s=summary();
+  card.innerHTML=`<div class="done">
+    <div class="big">🎉</div>
+    <h2 style="text-align:center">Баркалла! Всё готово.</h2>
+    <p class="hint" style="text-align:center; margin-top:6px">Осталось отправить ответы — нажмите зелёную кнопку, откроется WhatsApp с готовым сообщением.</p>
+    <a class="wa" href="https://wa.me/?text=${encodeURIComponent(s+'\n\n'+FILES)}" target="_blank">📲 Отправить ответы в WhatsApp</a>
+    <button class="copy" onclick="copyAns()">Скопировать ответы текстом</button>
+    <div class="sum">${esc(s)}</div>
+    <p class="hint" style="margin-top:12px">${esc(FILES)}</p>
+    <button class="btn skip" onclick="i=Q.length-1;render()">← Вернуться к вопросам</button>
+  </div>`;
+}
+function copyAns(){
+  navigator.clipboard.writeText(summary()+'\n\n'+FILES).then(()=>{
+    const t=document.getElementById('toast'); t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),1600);
+  });
+}
+render();
+</script>
+</body>
+</html>
